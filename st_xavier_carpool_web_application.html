@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-900">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XavCommute | St. Xavier's College Mumbai Carpool</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                            dark: '#0f172a'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .gradient-glow {
+            background: radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.25), transparent 70%);
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-900 min-h-screen flex flex-col justify-between selection:bg-blue-500 selection:text-white">
+
+    <div id="auth-screen-overlay" class="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center p-4 overflow-y-auto gradient-glow">
+        <div class="max-w-md w-full my-auto space-y-6">
+            
+            <!-- Branding Header -->
+            <div class="text-center space-y-2">
+                <div class="w-16 h-16 bg-blue-600 text-white rounded-2xl flex items-center justify-center font-black text-3xl mx-auto shadow-2xl border border-blue-400 ring-4 ring-blue-500/20">
+                    SX
+                </div>
+                <h1 class="text-3xl font-black text-white tracking-tight">XavCommute</h1>
+                <p class="text-xs text-slate-400 font-medium">St. Xavier's College (Autonomous), Fort, Mumbai</p>
+            </div>
+
+            <!-- Auth Form Card Container -->
+            <div class="bg-slate-900 rounded-3xl shadow-2xl border border-slate-800 overflow-hidden text-slate-100">
+                
+                <!-- Toggle Tabs -->
+                <div class="grid grid-cols-2 bg-slate-950 p-1.5 border-b border-slate-800 text-xs font-bold">
+                    <button id="auth-btn-login" onclick="toggleAuthMode('login')" class="py-3 rounded-xl bg-blue-600 text-white shadow-md transition-all duration-200 flex items-center justify-center gap-1.5">
+                        <i data-lucide="log-in" class="w-4 h-4"></i> Sign In
+                    </button>
+                    <button id="auth-btn-signup" onclick="toggleAuthMode('signup')" class="py-3 rounded-xl text-slate-400 hover:text-white transition-all duration-200 flex items-center justify-center gap-1.5">
+                        <i data-lucide="user-plus" class="w-4 h-4"></i> Create Account
+                    </button>
+                </div>
+
+                <!-- LOGIN FORM -->
+                <form id="form-login" onsubmit="handleAuthSubmit(event, 'login')" class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">College Email Address *</label>
+                        <div class="relative">
+                            <input type="email" id="login-email" required placeholder="name@xaviers.edu.in" class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-medium text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                        </div>
+                        <span class="text-[10px] text-slate-500 mt-1 block">Domain must be @xaviers.edu.in or @xaviers.ac.in</span>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Student Roll Number / UID *</label>
+                        <input type="text" id="login-uid" required placeholder="e.g. 220145" class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-medium text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Password *</label>
+                        <input type="password" required value="••••••••" class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-medium text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                    </div>
+
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl shadow-lg hover:shadow-blue-600/30 transition text-xs flex items-center justify-center gap-2">
+                        <i data-lucide="shield-check" class="w-4 h-4"></i> Authenticate & Enter Portal
+                    </button>
+                </form>
+
+                <!-- SIGNUP FORM -->
+                <form id="form-signup" onsubmit="handleAuthSubmit(event, 'signup')" class="p-6 space-y-4 hidden">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Full Student Name *</label>
+                        <input type="text" id="signup-name" required placeholder="e.g. Rohan Mehta" class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-medium text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Department *</label>
+                            <input type="text" id="signup-dept" required placeholder="e.g. SY BSc IT" class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-3 py-2 text-xs font-medium text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Roll # / UID *</label>
+                            <input type="text" id="signup-uid" required placeholder="e.g. 23104" class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-3 py-2 text-xs font-medium text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">College Email Address *</label>
+                        <input type="email" id="signup-email" required placeholder="student@xaviers.edu.in" class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-medium text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Home Suburb *</label>
+                        <input type="text" id="signup-suburb" required placeholder="e.g. Borivali West, Thane, Vashi" class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-medium text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Suburban Commute Line *</label>
+                        <select id="signup-line" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs font-medium text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="Western Line">Western Line (Borivali - Bandra)</option>
+                            <option value="Central Line">Central Line (Thane - Dadar)</option>
+                            <option value="Harbour Line">Harbour Line (Navi Mumbai)</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl shadow-lg transition text-xs flex items-center justify-center gap-2">
+                        <i data-lucide="check-circle-2" class="w-4 h-4"></i> Create Verified Account
+                    </button>
+                </form>
+
+                <!-- DEMO FAST LOGINS FOR GRADING -->
+                <div class="bg-slate-950 p-4 border-t border-slate-800 text-center space-y-2.5">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block flex items-center justify-center gap-1">
+                        <i data-lucide="zap" class="w-3 h-3 text-amber-400"></i> Quick Demo Login (For Professor / Grading)
+                    </span>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="quickDemoLogin('driver')" type="button" class="bg-slate-900 border border-slate-700 hover:border-blue-500 text-slate-200 font-semibold py-2 px-2 rounded-xl text-[11px] transition flex items-center justify-center gap-1.5 hover:bg-slate-800">
+                            <i data-lucide="car" class="w-3.5 h-3.5 text-blue-400"></i> Driver: Aarav
+                        </button>
+                        <button onclick="quickDemoLogin('commuter')" type="button" class="bg-slate-900 border border-slate-700 hover:border-emerald-500 text-slate-200 font-semibold py-2 px-2 rounded-xl text-[11px] transition flex items-center justify-center gap-1.5 hover:bg-slate-800">
+                            <i data-lucide="user" class="w-3.5 h-3.5 text-emerald-400"></i> Passenger: Ananya
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <p class="text-[11px] text-center text-slate-500">
+                Encrypted & Restricted to verified St. Xavier's College Students.
+            </p>
+        </div>
+    </div>
+
+    <div id="main-app-content" class="hidden min-h-screen flex flex-col justify-between bg-slate-50">
+        
+        <!-- Navbar -->
+        <header class="bg-slate-900 text-white sticky top-0 z-40 border-b border-slate-800 shadow-xl">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    
+                    <!-- Logo -->
+                    <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('find')">
+                        <div class="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center font-black text-xl shadow-md border border-blue-400">
+                            SX
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xl font-bold tracking-tight text-white">XavCommute</span>
+                                <span class="bg-blue-500/20 text-blue-300 border border-blue-400/30 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide">Campus Pool</span>
+                            </div>
+                            <p class="text-[11px] text-slate-400 hidden sm:block">St. Xavier's College (Autonomous), Fort, Mumbai</p>
+                        </div>
+                    </div>
+
+                    <!-- Desktop Nav Links -->
+                    <nav class="hidden md:flex items-center space-x-1 text-sm font-medium">
+                        <button id="nav-find" onclick="switchTab('find')" class="px-3.5 py-2 rounded-xl transition flex items-center gap-2 bg-blue-600 text-white font-semibold">
+                            <i data-lucide="search" class="w-4 h-4"></i> Find Rides
+                        </button>
+                        <button id="nav-offer" onclick="switchTab('offer')" class="px-3.5 py-2 rounded-xl transition flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800">
+                            <i data-lucide="plus-circle" class="w-4 h-4"></i> Offer Ride
+                        </button>
+                        <button id="nav-messages" onclick="switchTab('messages')" class="px-3.5 py-2 rounded-xl transition flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800 relative">
+                            <i data-lucide="message-square" class="w-4 h-4"></i> Messages
+                            <span id="unread-msg-badge" class="bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full">2</span>
+                        </button>
+                        <button id="nav-myrides" onclick="switchTab('myrides')" class="px-3.5 py-2 rounded-xl transition flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800 relative">
+                            <i data-lucide="car" class="w-4 h-4"></i> My Bookings
+                            <span id="booking-badge-count" class="bg-emerald-500 text-white font-bold text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
+                        </button>
+                        <button id="nav-security" onclick="switchTab('security')" class="px-3.5 py-2 rounded-xl transition flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800">
+                            <i data-lucide="shield-check" class="w-4 h-4"></i> Safety Hub
+                        </button>
+                    </nav>
+
+                    <!-- Student User Pill & Logout -->
+                    <div class="flex items-center gap-3">
+                        <div id="user-profile-badge" class="flex items-center gap-2.5 bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700">
+                            <img id="user-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" class="w-7 h-7 rounded-full object-cover border border-blue-400">
+                            <div class="text-left text-xs hidden sm:block">
+                                <div class="font-bold text-white flex items-center gap-1">
+                                    <span id="user-display-name">Aarav Sharma</span>
+                                    <i data-lucide="badge-check" class="w-3.5 h-3.5 text-blue-400 fill-blue-400"></i>
+                                </div>
+                                <span id="user-display-dept" class="text-slate-400 text-[10px]">TY BSc IT • #22018</span>
+                            </div>
+                        </div>
+
+                        <button onclick="handleLogout()" title="Log out" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 p-2 rounded-xl transition flex items-center gap-1.5 text-xs font-bold">
+                            <i data-lucide="log-out" class="w-4 h-4"></i>
+                            <span class="hidden sm:inline">Logout</span>
+                        </button>
+
+                        <button onclick="toggleMobileMenu()" class="md:hidden text-slate-300 hover:text-white p-2">
+                            <i data-lucide="menu" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Mobile Drawer Menu -->
+            <div id="mobile-menu" class="hidden md:hidden bg-slate-900 border-t border-slate-800 px-4 pt-2 pb-4 space-y-1">
+                <button onclick="switchTab('find'); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-white flex items-center gap-2">
+                    <i data-lucide="search" class="w-4 h-4 text-blue-400"></i> Find Rides
+                </button>
+                <button onclick="switchTab('offer'); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white flex items-center gap-2">
+                    <i data-lucide="plus-circle" class="w-4 h-4 text-blue-400"></i> Offer Ride
+                </button>
+                <button onclick="switchTab('messages'); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white flex items-center gap-2">
+                    <i data-lucide="message-square" class="w-4 h-4 text-blue-400"></i> Messages
+                </button>
+                <button onclick="switchTab('myrides'); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white flex items-center gap-2">
+                    <i data-lucide="car" class="w-4 h-4 text-blue-400"></i> My Bookings
+                </button>
+                <button onclick="switchTab('security'); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white flex items-center gap-2">
+                    <i data-lucide="shield-check" class="w-4 h-4 text-blue-400"></i> Safety Hub
+                </button>
+            </div>
+        </header>
+
+        <section class="bg-gradient-to-r from-blue-900 via-slate-900 to-blue-950 text-white py-6 px-4 sm:px-6 lg:px-8 border-b border-slate-800">
+            <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+                <div>
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-300 text-xs font-semibold mb-2">
+                        <i data-lucide="shield-check" class="w-3.5 h-3.5 text-blue-400"></i> Verified Xavierite Commute Network
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                        Suburban Mumbai ➔ St. Xavier's Fort Campus
+                    </h1>
+                    <p class="text-slate-300 text-xs sm:text-sm mt-1 max-w-2xl">
+                        Peer-to-peer student carpooling from Borivali, Thane, Navi Mumbai, Andheri, Bandra & Dadar. Safe, cost-effective, and verified.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3 w-full lg:w-auto">
+                    <div class="bg-slate-800/80 border border-slate-700/60 p-3 rounded-2xl text-center">
+                        <div class="text-xl font-extrabold text-blue-400" id="stat-active-rides">3</div>
+                        <div class="text-[10px] text-slate-400">Active Rides</div>
+                    </div>
+                    <div class="bg-slate-800/80 border border-slate-700/60 p-3 rounded-2xl text-center">
+                        <div class="text-xl font-extrabold text-emerald-400">₹65</div>
+                        <div class="text-[10px] text-slate-400">Avg. Fuel Share</div>
+                    </div>
+                    <div class="bg-slate-800/80 border border-slate-700/60 p-3 rounded-2xl text-center">
+                        <div class="text-xl font-extrabold text-amber-400">100%</div>
+                        <div class="text-[10px] text-slate-400">ID Verified</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
+
+            <!-- TAB 1: FIND RIDES -->
+            <section id="tab-find" class="space-y-6">
+                
+                <!-- Filter Bar Card -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                        
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Pickup Suburb</label>
+                            <input type="text" id="filter-search" onkeyup="applyFilters()" placeholder="e.g. Borivali, Thane, Powai" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-600 focus:bg-white outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Suburban Line</label>
+                            <select id="filter-region" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-600 focus:bg-white outline-none">
+                                <option value="all">All Lines</option>
+                                <option value="western">Western Line (Borivali - Bandra)</option>
+                                <option value="central">Central Line (Thane - Dadar)</option>
+                                <option value="harbour">Harbour Line / Navi Mumbai</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Direction</label>
+                            <select id="filter-direction" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-600 focus:bg-white outline-none">
+                                <option value="all">All Directions</option>
+                                <option value="to_college">To St. Xavier's (Morning)</option>
+                                <option value="from_college">From St. Xavier's (Evening)</option>
+                            </select>
+                        </div>
+
+                        <div class="flex items-end">
+                            <label class="w-full bg-pink-50 border border-pink-200 hover:bg-pink-100 px-3 py-2 rounded-xl flex items-center gap-2 cursor-pointer transition">
+                                <input type="checkbox" id="filter-female-only" onchange="applyFilters()" class="rounded text-pink-600 focus:ring-pink-500">
+                                <span class="text-xs font-bold text-pink-700 flex items-center gap-1">
+                                    <i data-lucide="user-check" class="w-3.5 h-3.5"></i> Women Only
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="flex items-end">
+                            <button onclick="resetFilters()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-3 rounded-xl text-xs transition flex items-center justify-center gap-1">
+                                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Clear Filters
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Suburban Map Animation Canvas -->
+                <div class="bg-slate-900 text-white rounded-2xl p-4 shadow-sm border border-slate-800">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></div>
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-blue-400">Live Mumbai Route Convergence</h3>
+                        </div>
+                        <span class="text-[11px] text-slate-400">Main Campus Spot: <b class="text-white">Mahapalika Marg Gate</b></span>
+                    </div>
+                    <div class="relative w-full h-20 bg-slate-950 rounded-xl border border-slate-800">
+                        <canvas id="routeCanvas" class="w-full h-full block"></canvas>
+                    </div>
+                </div>
+
+                <!-- Rides Grid -->
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            Available Campus Pools <span id="ride-count-badge" class="bg-blue-600 text-white text-xs px-2.5 py-0.5 rounded-full font-bold">0</span>
+                        </h2>
+                        <span class="text-xs text-slate-500">Sorted by Departure Time</span>
+                    </div>
+
+                    <div id="rides-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                        <!-- Dynamic Ride Cards Rendered -->
+                    </div>
+
+                    <div id="empty-rides" class="hidden bg-white rounded-2xl p-10 text-center border border-slate-200">
+                        <div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3 text-slate-400">
+                            <i data-lucide="car-off" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-base font-bold text-slate-700">No carpools match your criteria</h3>
+                        <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Try adjusting your pickup suburb, line, or filter preferences to see more rides.</p>
+                        <button onclick="resetFilters()" class="mt-3 px-4 py-2 bg-blue-600 text-white text-xs font-semibold rounded-xl hover:bg-blue-700 transition">
+                            Reset Search Filters
+                        </button>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- TAB 2: OFFER A RIDE -->
+            <section id="tab-offer" class="hidden max-w-2xl mx-auto">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="bg-slate-900 text-white p-6 border-b border-slate-800">
+                        <h2 class="text-xl font-bold flex items-center gap-2">
+                            <i data-lucide="plus-circle" class="text-blue-400"></i> Post a Campus Carpool
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-1">Share your ride to St. Xavier's and split daily fuel expenses with peers.</p>
+                    </div>
+
+                    <form id="offer-ride-form" onsubmit="handleOfferRide(event)" class="p-6 space-y-5">
+                        
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Trip Direction *</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="flex items-center p-3 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50 transition">
+                                    <input type="radio" name="direction" value="to_college" checked class="text-blue-600 focus:ring-blue-600">
+                                    <span class="ml-2.5 text-xs font-bold text-slate-800">To St. Xavier's (Morning)</span>
+                                </label>
+                                <label class="flex items-center p-3 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50 transition">
+                                    <input type="radio" name="direction" value="from_college" class="text-blue-600 focus:ring-blue-600">
+                                    <span class="ml-2.5 text-xs font-bold text-slate-800">From St. Xavier's (Evening)</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Suburban Pickup Point *</label>
+                                <input type="text" required id="form-origin" placeholder="e.g. Borivali West, Thane Teen Haat" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-600 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Suburban Line *</label>
+                                <select id="form-line" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-600 outline-none">
+                                    <option value="Western Line">Western Line (Borivali - Bandra)</option>
+                                    <option value="Central Line">Central Line (Thane - Dadar)</option>
+                                    <option value="Harbour Line">Harbour Line (Navi Mumbai)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">En-Route Pickups</label>
+                            <input type="text" id="form-stops" placeholder="e.g. Kandivali, Andheri WEH Junction" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-600 outline-none">
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Departure Time *</label>
+                                <input type="time" id="form-time" required value="07:30" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-600 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Seats Available *</label>
+                                <select id="form-seats" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-600 outline-none">
+                                    <option value="1">1 Seat</option>
+                                    <option value="2" selected>2 Seats</option>
+                                    <option value="3">3 Seats</option>
+                                    <option value="4">4 Seats</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Fuel Contribution (₹) *</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-2 text-slate-400 font-bold text-xs">₹</span>
+                                    <input type="number" id="form-price" required min="30" max="250" value="70" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-7 pr-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-600 outline-none">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Vehicle Model & Color *</label>
+                                <input type="text" id="form-car" required placeholder="e.g. Honda City (White)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-600 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Registration No. *</label>
+                                <input type="text" id="form-plateno" required placeholder="e.g. MH 02 CZ 4812" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-600 outline-none">
+                            </div>
+                        </div>
+
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                            <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Safety Settings</span>
+                            <div class="flex flex-wrap gap-4 text-xs font-medium text-slate-700">
+                                <label class="flex items-center gap-1.5 cursor-pointer">
+                                    <input type="checkbox" id="form-is-female" class="rounded text-pink-600 focus:ring-pink-500">
+                                    <span>Women-Only Carpool</span>
+                                </label>
+                                <label class="flex items-center gap-1.5 cursor-pointer">
+                                    <input type="checkbox" id="form-ac" checked class="rounded text-blue-600 focus:ring-blue-500">
+                                    <span>Air Conditioning On</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow transition text-xs flex items-center justify-center gap-2">
+                            <i data-lucide="check-circle" class="w-4 h-4"></i> Publish Carpool Offer
+                        </button>
+
+                    </form>
+                </div>
+            </section>
+
+            <!-- TAB 3: MESSAGES -->
+            <section id="tab-messages" class="hidden space-y-4">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden grid grid-cols-1 lg:grid-cols-12 h-[600px]">
+                    
+                    <div class="lg:col-span-4 border-r border-slate-200 bg-slate-50 flex flex-col h-full">
+                        <div class="p-4 border-b border-slate-200 bg-white">
+                            <h2 class="font-bold text-slate-800 text-base flex items-center justify-between">
+                                <span>Campus Carpool Chats</span>
+                                <span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold">Live</span>
+                            </h2>
+                        </div>
+
+                        <div class="flex-grow overflow-y-auto custom-scrollbar divide-y divide-slate-200/60" id="chat-channels-list">
+                            <div onclick="selectChatThread('borivali')" id="thread-borivali" class="p-3.5 bg-blue-50/80 hover:bg-blue-50 cursor-pointer transition border-l-4 border-blue-600">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="font-bold text-xs text-slate-800 truncate">Borivali ➔ Xavier's (8:00 AM)</span>
+                                    <span class="text-[10px] text-slate-400">8:12 AM</span>
+                                </div>
+                                <p class="text-[11px] text-slate-500 truncate">Aarav: I am parked near Shimpoli signal.</p>
+                            </div>
+
+                            <div onclick="selectChatThread('thane')" id="thread-thane" class="p-3.5 hover:bg-slate-100 cursor-pointer transition">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="font-bold text-xs text-slate-800 truncate">Thane Express Carpool</span>
+                                    <span class="text-[10px] text-slate-400">7:45 AM</span>
+                                </div>
+                                <p class="text-[11px] text-slate-500 truncate">Ananya: Leaving Teen Haat in 5 mins!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-8 flex flex-col h-full bg-white">
+                        <div class="p-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs">
+                                    SX
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-sm text-slate-800" id="chat-title">Borivali ➔ St. Xavier's</h3>
+                                    <p class="text-[11px] text-slate-500" id="chat-subtitle">Group Members • Verified Xavierites</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="chat-body" class="flex-grow p-4 overflow-y-auto space-y-3 custom-scrollbar bg-slate-50/50">
+                            <!-- Messages rendered dynamically -->
+                        </div>
+
+                        <div class="px-4 py-2 bg-slate-100 border-t border-slate-200 flex items-center gap-2 overflow-x-auto text-[11px]">
+                            <span class="text-slate-400 font-semibold flex-shrink-0">Quick Reply:</span>
+                            <button onclick="sendQuickMessage('I am waiting at the pickup spot!')" class="bg-white border border-slate-200 hover:border-blue-500 text-slate-700 px-2.5 py-1 rounded-lg flex-shrink-0 transition">
+                                "I am waiting at the pickup spot!"
+                            </button>
+                            <button onclick="sendQuickMessage('Running 5 mins late due to signal.')" class="bg-white border border-slate-200 hover:border-blue-500 text-slate-700 px-2.5 py-1 rounded-lg flex-shrink-0 transition">
+                                "Running 5 mins late due to signal."
+                            </button>
+                        </div>
+
+                        <div class="p-3 border-t border-slate-200 flex gap-2 bg-white">
+                            <input type="text" id="chat-input" placeholder="Type message..." onkeypress="if(event.key==='Enter') sendMessage()" class="flex-grow bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs focus:ring-2 focus:ring-blue-600 outline-none">
+                            <button onclick="sendMessage()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1">
+                                <i data-lucide="send" class="w-3.5 h-3.5"></i> Send
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- TAB 4: MY BOOKINGS -->
+            <section id="tab-myrides" class="hidden space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">My Reserved Bookings</h2>
+                        <p class="text-xs text-slate-500">Track your upcoming rides and driver OTP verification codes.</p>
+                    </div>
+                </div>
+
+                <div id="my-bookings-list" class="space-y-3">
+                    <!-- Dynamic bookings list -->
+                </div>
+            </section>
+
+            <!-- TAB 5: SAFETY HUB -->
+            <section id="tab-security" class="hidden max-w-4xl mx-auto space-y-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-12 h-12 bg-blue-100 text-blue-700 rounded-xl flex items-center justify-center">
+                            <i data-lucide="shield-check" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-800">Safety & Student Verification Hub</h2>
+                            <p class="text-xs text-slate-500">Trust measures and campus security integration on XavCommute.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        
+                        <div class="p-4 border border-slate-200 rounded-xl bg-slate-50 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <h3 class="font-bold text-slate-800 text-sm">Xavier Domain Check</h3>
+                                <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">Verified</span>
+                            </div>
+                            <p class="text-xs text-slate-600">Account Domain: <b id="sec-user-email" class="text-slate-800">student@xaviers.edu.in</b></p>
+                            <p class="text-[11px] text-slate-500">UID/Roll: <span id="sec-user-uid">#22018</span>. Verified against campus registry.</p>
+                        </div>
+
+                        <div class="p-4 border border-slate-200 rounded-xl bg-slate-50 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <h3 class="font-bold text-slate-800 text-sm">4-Digit Trip OTP</h3>
+                                <span class="text-[10px] bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded">Active</span>
+                            </div>
+                            <p class="text-xs text-slate-600">Riders share OTP code with driver upon entering the vehicle to start ride tracking.</p>
+                        </div>
+
+                        <div class="p-4 border border-slate-200 rounded-xl bg-slate-50 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <h3 class="font-bold text-slate-800 text-sm">Campus Drop-off Spot</h3>
+                                <span class="text-[10px] bg-slate-200 text-slate-800 font-bold px-2 py-0.5 rounded">Gate Verified</span>
+                            </div>
+                            <p class="text-xs text-slate-600">Drop-offs allowed only at <b>Mahapalika Marg Main Gate</b> or <b>Cama Gate</b>.</p>
+                        </div>
+
+                        <div class="p-4 border border-slate-200 rounded-xl bg-slate-50 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <h3 class="font-bold text-slate-800 text-sm">Campus Security SOS</h3>
+                                <span class="text-[10px] bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded">Emergency</span>
+                            </div>
+                            <button onclick="triggerEmergencyAlert()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-2 transition">
+                                <i data-lucide="alert-triangle" class="w-4 h-4"></i> Test Campus SOS Alert
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <div id="booking-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-white rounded-2xl max-w-md w-full overflow-hidden shadow-2xl border border-slate-200">
+                <div class="bg-slate-900 text-white p-5 flex items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-base" id="modal-route-title">Request Seat</h3>
+                        <p class="text-xs text-blue-300">St. Xavier's College Commute</p>
+                    </div>
+                    <button onclick="closeModal()" class="text-slate-400 hover:text-white p-1">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <div class="p-5 space-y-4">
+                    <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                        <img id="modal-driver-img" src="" class="w-10 h-10 rounded-full object-cover border border-blue-500">
+                        <div>
+                            <div class="font-bold text-slate-800 text-xs" id="modal-driver-name">Driver Name</div>
+                            <div class="text-[11px] text-slate-500" id="modal-driver-dept">Department</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 border border-blue-200 p-3 rounded-xl flex items-center justify-between">
+                        <div>
+                            <span class="text-xs font-bold text-slate-800 block">Fuel Contribution</span>
+                            <span class="text-[10px] text-slate-500">Paid directly via UPI/Cash</span>
+                        </div>
+                        <span class="text-xl font-black text-blue-700" id="modal-price">₹70</span>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-slate-50 border-t border-slate-200 flex gap-2">
+                    <button onclick="closeModal()" class="w-1/3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-200 rounded-xl transition">
+                        Cancel
+                    </button>
+                    <button onclick="confirmBooking()" class="w-2/3 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-xl text-xs transition flex items-center justify-center gap-1">
+                        <i data-lucide="check" class="w-4 h-4"></i> Confirm Seat Booking
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="toast" class="fixed bottom-5 right-5 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none border border-slate-800">
+            <div id="toast-icon" class="text-emerald-400">
+                <i data-lucide="check-circle" class="w-5 h-5"></i>
+            </div>
+            <div id="toast-message" class="text-xs font-medium">Notification message</div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="bg-slate-900 text-white border-t border-slate-800 py-6 px-4 sm:px-6 lg:px-8 text-xs text-slate-400">
+            <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-blue-600 text-white rounded-lg flex items-center justify-center font-bold text-[10px]">
+                        SX
+                    </div>
+                    <span>St. Xavier's College (Autonomous), Fort, Mumbai</span>
+                </div>
+                <p>XavCommute • Student Carpool Platform</p>
+            </div>
+        </footer>
+
+    </div>
+
+    <script>
+        let currentUser = null;
+
+        let ridesData = [
+            {
+                id: 'ride-1',
+                driverName: 'Aarav Sharma',
+                driverDept: 'TY BSc IT • Roll #22018',
+                driverImg: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=120&auto=format&fit=crop&q=80',
+                direction: 'to_college',
+                region: 'western',
+                line: 'Western Line',
+                origin: 'Borivali (Shimpoli)',
+                stops: 'Kandivali, Andheri WEH',
+                destination: "St. Xavier's Main Gate",
+                time: '07:20 AM',
+                seatsAvailable: 2,
+                totalSeats: 3,
+                price: 75,
+                carModel: 'Hyundai i20 (Red)',
+                plateNo: 'MH 02 ER 9182',
+                femaleOnly: false
+            },
+            {
+                id: 'ride-2',
+                driverName: 'Ananya Roy',
+                driverDept: 'SY BA Arts • Roll #23112',
+                driverImg: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=120&auto=format&fit=crop&q=80',
+                direction: 'to_college',
+                region: 'central',
+                line: 'Central Line',
+                origin: 'Thane West (Teen Haat)',
+                stops: 'Mulund, Ghatkopar, Dadar',
+                destination: "St. Xavier's Cama Gate",
+                time: '07:15 AM',
+                seatsAvailable: 3,
+                totalSeats: 4,
+                price: 85,
+                carModel: 'Honda City (White)',
+                plateNo: 'MH 04 FA 3310',
+                femaleOnly: true
+            },
+            {
+                id: 'ride-3',
+                driverName: 'Devansh Shah',
+                driverDept: 'SY BCom • Roll #23405',
+                driverImg: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80',
+                direction: 'to_college',
+                region: 'western',
+                line: 'Western Line',
+                origin: 'Andheri West',
+                stops: 'JVPD Circle, Bandra',
+                destination: "St. Xavier's Main Gate",
+                time: '07:45 AM',
+                seatsAvailable: 1,
+                totalSeats: 3,
+                price: 55,
+                carModel: 'Maruti Baleno (Blue)',
+                plateNo: 'MH 02 CQ 1104',
+                femaleOnly: false
+            }
+        ];
+
+        let myBookings = [];
+        let selectedRideForModal = null;
+
+        let activeChatThread = 'borivali';
+        let chatThreads = {
+            borivali: [
+                { sender: 'Aarav Sharma', text: 'Hey, leaving Borivali Shimpoli at 7:20 AM sharp!', time: '8:05 AM', isMe: false },
+                { sender: 'You', text: 'Sounds good! I will be waiting near the flyover bus stop.', time: '8:10 AM', isMe: true },
+                { sender: 'Aarav Sharma', text: 'I am parked near Shimpoli signal now.', time: '8:12 AM', isMe: false }
+            ],
+            thane: [
+                { sender: 'Ananya Roy', text: 'Thane poolers, traffic at Teen Haat is smooth today.', time: '7:30 AM', isMe: false },
+                { sender: 'Ananya Roy', text: 'Leaving Teen Haat Naka in 5 mins!', time: '7:45 AM', isMe: false }
+            ]
+        };
+
+        window.onload = function() {
+            lucide.createIcons();
+            // Default state: Keep user on Fullscreen Auth Overlay
+        };
+
+        function toggleAuthMode(mode) {
+            const loginBtn = document.getElementById('auth-btn-login');
+            const signupBtn = document.getElementById('auth-btn-signup');
+            const loginForm = document.getElementById('form-login');
+            const signupForm = document.getElementById('form-signup');
+
+            if (mode === 'login') {
+                loginBtn.className = "py-3 rounded-xl bg-blue-600 text-white shadow-md transition-all duration-200 flex items-center justify-center gap-1.5";
+                signupBtn.className = "py-3 rounded-xl text-slate-400 hover:text-white transition-all duration-200 flex items-center justify-center gap-1.5";
+                loginForm.classList.remove('hidden');
+                signupForm.classList.add('hidden');
+            } else {
+                signupBtn.className = "py-3 rounded-xl bg-blue-600 text-white shadow-md transition-all duration-200 flex items-center justify-center gap-1.5";
+                loginBtn.className = "py-3 rounded-xl text-slate-400 hover:text-white transition-all duration-200 flex items-center justify-center gap-1.5";
+                signupForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+            }
+        }
+
+        function handleAuthSubmit(e, mode) {
+            e.preventDefault();
+            let email, name, uid, dept;
+
+            if (mode === 'login') {
+                email = document.getElementById('login-email').value;
+                uid = document.getElementById('login-uid').value;
+                name = "Aarav Sharma";
+                dept = "TY BSc IT • Roll #" + (uid || "22018");
+            } else {
+                email = document.getElementById('signup-email').value;
+                name = document.getElementById('signup-name').value;
+                uid = document.getElementById('signup-uid').value;
+                dept = document.getElementById('signup-dept').value + " • Roll #" + uid;
+            }
+
+            if (!email.toLowerCase().endsWith('@xaviers.edu.in') && !email.toLowerCase().endsWith('@xaviers.ac.in')) {
+                showToast("⚠️ Email must end with @xaviers.edu.in or @xaviers.ac.in!");
+                return;
+            }
+
+            loginUser({
+                name: name,
+                email: email,
+                uid: uid,
+                dept: dept,
+                img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
+            });
+        }
+
+        function quickDemoLogin(type) {
+            if (type === 'driver') {
+                loginUser({
+                    name: "Aarav Sharma",
+                    email: "aarav.sharma@xaviers.edu.in",
+                    uid: "22018",
+                    dept: "TY BSc IT • Roll #22018",
+                    img: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=120&auto=format&fit=crop&q=80"
+                });
+            } else {
+                loginUser({
+                    name: "Ananya Roy",
+                    email: "ananya.roy@xaviers.edu.in",
+                    uid: "23112",
+                    dept: "SY BA Arts • Roll #23112",
+                    img: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=120&auto=format&fit=crop&q=80"
+                });
+            }
+        }
+
+        function loginUser(userObj) {
+            currentUser = userObj;
+
+            document.getElementById('user-display-name').innerText = currentUser.name;
+            document.getElementById('user-display-dept').innerText = currentUser.dept;
+            document.getElementById('user-avatar').src = currentUser.img;
+            document.getElementById('sec-user-email').innerText = currentUser.email;
+            document.getElementById('sec-user-uid').innerText = "#" + currentUser.uid;
+
+            // Hide Auth Overlay and Show App Dashboard
+            document.getElementById('auth-screen-overlay').classList.add('hidden');
+            document.getElementById('main-app-content').classList.remove('hidden');
+
+            switchTab('find');
+            renderRides(ridesData);
+            renderMyBookings();
+            renderChatMessages();
+            updateStatsHeader();
+            showToast(`Authenticated! Welcome back, ${currentUser.name}.`);
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            document.getElementById('main-app-content').classList.add('hidden');
+            document.getElementById('auth-screen-overlay').classList.remove('hidden');
+            showToast("Logged out successfully.");
+        }
+
+        function switchTab(tabId) {
+            if (!currentUser) return;
+
+            const tabs = ['find', 'offer', 'messages', 'myrides', 'security'];
+            tabs.forEach(t => {
+                const el = document.getElementById(`tab-${t}`);
+                const navEl = document.getElementById(`nav-${t}`);
+                if (el) el.classList.add('hidden');
+                if (navEl) {
+                    navEl.classList.remove('bg-blue-600', 'text-white', 'font-semibold');
+                    navEl.classList.add('text-slate-300');
+                }
+            });
+
+            const activeTab = document.getElementById(`tab-${tabId}`);
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            if (activeTab) activeTab.classList.remove('hidden');
+            if (activeNav) {
+                activeNav.classList.add('bg-blue-600', 'text-white', 'font-semibold');
+                activeNav.classList.remove('text-slate-300');
+            }
+
+            if (tabId === 'find') {
+                setTimeout(initRouteCanvas, 50);
+            }
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
+
+        function renderRides(rides) {
+            const container = document.getElementById('rides-grid');
+            const emptyState = document.getElementById('empty-rides');
+            const badgeCount = document.getElementById('ride-count-badge');
+
+            if (!container) return;
+            container.innerHTML = '';
+            badgeCount.innerText = rides.length;
+
+            if (rides.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            rides.forEach(ride => {
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition duration-200 overflow-hidden flex flex-col justify-between";
+
+                const isFemaleBadge = ride.femaleOnly ? 
+                    `<span class="bg-pink-100 text-pink-700 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <i data-lucide="user-check" class="w-3 h-3"></i> Women Only
+                    </span>` : '';
+
+                card.innerHTML = `
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[11px] font-bold px-2 py-0.5 rounded-md ${ride.direction === 'to_college' ? 'bg-amber-100 text-amber-800' : 'bg-indigo-100 text-indigo-800'}">
+                                ${ride.direction === 'to_college' ? '☀ To Xavier\'s' : '🌆 From Xavier\'s'}
+                            </span>
+                            <div class="flex items-center gap-1">
+                                ${isFemaleBadge}
+                                <span class="text-[10px] bg-slate-100 font-semibold text-slate-600 px-2 py-0.5 rounded-full">
+                                    ${ride.line}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3 my-3 pb-2.5 border-b border-slate-100">
+                            <img src="${ride.driverImg}" class="w-10 h-10 rounded-full object-cover border border-blue-500">
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-xs flex items-center gap-1">
+                                    ${ride.driverName}
+                                    <i data-lucide="badge-check" class="w-3.5 h-3.5 text-blue-600 fill-blue-600"></i>
+                                </h4>
+                                <p class="text-[10px] text-slate-500">${ride.driverDept}</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-1.5 text-xs">
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-400 text-[11px]">Departure:</span>
+                                <span class="font-bold text-slate-800">${ride.time}</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-400 text-[11px]">Pickup:</span>
+                                <span class="font-bold text-slate-800 truncate max-w-[180px]">${ride.origin}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="px-4 py-2.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] text-slate-400 block">Fuel Share</span>
+                            <span class="text-base font-black text-blue-700">₹${ride.price}<span class="text-[10px] font-normal text-slate-500">/seat</span></span>
+                        </div>
+
+                        <div class="text-right">
+                            <span class="text-[10px] font-semibold block mb-1 ${ride.seatsAvailable > 0 ? 'text-emerald-600' : 'text-red-500'}">
+                                ${ride.seatsAvailable} seats left
+                            </span>
+                            <button onclick="openBookingModal('${ride.id}')" ${ride.seatsAvailable === 0 ? 'disabled' : ''} class="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1">
+                                Request Seat
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+
+            lucide.createIcons();
+        }
+
+        function applyFilters() {
+            const dir = document.getElementById('filter-direction').value;
+            const region = document.getElementById('filter-region').value;
+            const searchText = document.getElementById('filter-search').value.toLowerCase();
+            const femaleOnly = document.getElementById('filter-female-only').checked;
+
+            const filtered = ridesData.filter(ride => {
+                if (dir !== 'all' && ride.direction !== dir) return false;
+                if (region !== 'all' && ride.region !== region) return false;
+                if (femaleOnly && !ride.femaleOnly) return false;
+                if (searchText && !ride.origin.toLowerCase().includes(searchText) && !ride.stops.toLowerCase().includes(searchText)) return false;
+                return true;
+            });
+
+            renderRides(filtered);
+        }
+
+        function resetFilters() {
+            document.getElementById('filter-direction').value = 'all';
+            document.getElementById('filter-region').value = 'all';
+            document.getElementById('filter-search').value = '';
+            document.getElementById('filter-female-only').checked = false;
+            renderRides(ridesData);
+        }
+
+        function handleOfferRide(e) {
+            e.preventDefault();
+            
+            const direction = document.querySelector('input[name="direction"]:checked').value;
+            const origin = document.getElementById('form-origin').value;
+            const line = document.getElementById('form-line').value;
+            const timeVal = document.getElementById('form-time').value;
+            const seats = parseInt(document.getElementById('form-seats').value);
+            const price = parseInt(document.getElementById('form-price').value);
+            const car = document.getElementById('form-car').value;
+            const plateNo = document.getElementById('form-plateno').value;
+            const isFemale = document.getElementById('form-is-female').checked;
+
+            let region = 'western';
+            if (line.includes('Central')) region = 'central';
+            if (line.includes('Harbour')) region = 'harbour';
+
+            const newRide = {
+                id: 'ride-' + Date.now(),
+                driverName: currentUser ? currentUser.name : 'Aarav Sharma',
+                driverDept: currentUser ? currentUser.dept : 'TY BSc IT • Roll #22018',
+                driverImg: currentUser ? currentUser.img : 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=120&auto=format&fit=crop&q=80',
+                direction: direction,
+                region: region,
+                line: line,
+                origin: origin,
+                stops: 'Direct Campus Route',
+                destination: "St. Xavier's Main Gate",
+                time: timeVal,
+                seatsAvailable: seats,
+                totalSeats: seats,
+                price: price,
+                carModel: car,
+                plateNo: plateNo,
+                femaleOnly: isFemale
+            };
+
+            ridesData.unshift(newRide);
+            showToast('Ride Offer Published Successfully!');
+            switchTab('find');
+            renderRides(ridesData);
+            updateStatsHeader();
+            confetti({ particleCount: 40, spread: 50, origin: { y: 0.7 } });
+        }
+
+        function openBookingModal(rideId) {
+            const ride = ridesData.find(r => r.id === rideId);
+            if (!ride) return;
+
+            selectedRideForModal = ride;
+            document.getElementById('modal-route-title').innerText = `${ride.origin} ➔ Xavier's`;
+            document.getElementById('modal-driver-name').innerText = ride.driverName;
+            document.getElementById('modal-driver-dept').innerText = ride.driverDept;
+            document.getElementById('modal-driver-img').src = ride.driverImg;
+            document.getElementById('modal-price').innerText = `₹${ride.price}`;
+
+            document.getElementById('booking-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('booking-modal').classList.add('hidden');
+            selectedRideForModal = null;
+        }
+
+        function confirmBooking() {
+            if (!selectedRideForModal) return;
+
+            if (selectedRideForModal.seatsAvailable > 0) {
+                selectedRideForModal.seatsAvailable--;
+
+                const newBooking = {
+                    id: 'bk-' + Math.floor(1000 + Math.random() * 9000),
+                    otp: Math.floor(1000 + Math.random() * 9000),
+                    driverName: selectedRideForModal.driverName,
+                    route: `${selectedRideForModal.origin} ➔ Xavier's`,
+                    time: selectedRideForModal.time,
+                    price: selectedRideForModal.price
+                };
+
+                myBookings.unshift(newBooking);
+                closeModal();
+                showToast(`Seat booked! OTP code generated: ${newBooking.otp}`);
+                renderRides(ridesData);
+                renderMyBookings();
+                switchTab('myrides');
+                confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
+            }
+        }
+
+        function renderMyBookings() {
+            const container = document.getElementById('my-bookings-list');
+            const badgeCount = document.getElementById('booking-badge-count');
+            if (!container) return;
+
+            container.innerHTML = '';
+            
+            if (myBookings.length > 0) {
+                badgeCount.innerText = myBookings.length;
+                badgeCount.classList.remove('hidden');
+            } else {
+                badgeCount.classList.add('hidden');
+                container.innerHTML = `<div class="p-6 bg-white rounded-2xl text-center text-slate-500 text-xs border border-slate-200">No active carpool bookings. Use the Find Rides tab to book a seat!</div>`;
+                return;
+            }
+
+            myBookings.forEach(bk => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between";
+                
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Confirmed</span>
+                            <span class="text-xs text-slate-400 font-mono">Trip OTP: <b>${bk.otp}</b></span>
+                        </div>
+                        <h4 class="font-bold text-slate-800 text-sm">${bk.route}</h4>
+                        <p class="text-xs text-slate-500">Driver: ${bk.driverName} | ${bk.time}</p>
+                    </div>
+                    <span class="text-base font-black text-blue-700">₹${bk.price}</span>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function selectChatThread(threadKey) {
+            activeChatThread = threadKey;
+            
+            ['borivali', 'thane'].forEach(k => {
+                const el = document.getElementById(`thread-${k}`);
+                if (el) {
+                    el.classList.remove('bg-blue-50/80', 'border-l-4', 'border-blue-600');
+                    el.classList.add('hover:bg-slate-100');
+                }
+            });
+
+            const selectedEl = document.getElementById(`thread-${threadKey}`);
+            if (selectedEl) {
+                selectedEl.classList.add('bg-blue-50/80', 'border-l-4', 'border-blue-600');
+            }
+
+            if (threadKey === 'borivali') {
+                document.getElementById('chat-title').innerText = "Borivali ➔ St. Xavier's (8:00 AM)";
+                document.getElementById('chat-subtitle').innerText = "Group Members • Driver: Aarav Sharma";
+            } else {
+                document.getElementById('chat-title').innerText = "Thane Express Carpool";
+                document.getElementById('chat-subtitle').innerText = "Group Members • Driver: Ananya Roy";
+            }
+
+            renderChatMessages();
+        }
+
+        function renderChatMessages() {
+            const container = document.getElementById('chat-body');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const msgs = chatThreads[activeChatThread] || [];
+            msgs.forEach(m => {
+                const msgEl = document.createElement('div');
+                if (m.isMe) {
+                    msgEl.className = "bg-blue-600 text-white p-3 rounded-2xl text-xs max-w-[80%] ml-auto shadow-sm";
+                    msgEl.innerHTML = `<span class="font-bold text-blue-200 block text-[10px]">You • ${m.time}</span>${m.text}`;
+                } else {
+                    msgEl.className = "bg-white border border-slate-200 text-slate-800 p-3 rounded-2xl text-xs max-w-[80%] shadow-sm";
+                    msgEl.innerHTML = `<span class="font-bold text-blue-700 block text-[10px]">${m.sender} • ${m.time}</span>${m.text}`;
+                }
+                container.appendChild(msgEl);
+            });
+
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            if (!chatThreads[activeChatThread]) chatThreads[activeChatThread] = [];
+
+            chatThreads[activeChatThread].push({
+                sender: 'You',
+                text: text,
+                time: 'Just now',
+                isMe: true
+            });
+
+            input.value = '';
+            renderChatMessages();
+
+            setTimeout(() => {
+                chatThreads[activeChatThread].push({
+                    sender: 'Driver',
+                    text: 'Got it! See you at the pickup point.',
+                    time: 'Just now',
+                    isMe: false
+                });
+                renderChatMessages();
+            }, 1200);
+        }
+
+        function sendQuickMessage(presetText) {
+            document.getElementById('chat-input').value = presetText;
+            sendMessage();
+        }
+
+        function initRouteCanvas() {
+            const canvas = document.getElementById('routeCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+
+            const w = canvas.width;
+            const h = canvas.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            ctx.beginPath();
+            ctx.moveTo(20, 20);
+            ctx.lineTo(w - 40, h / 2);
+            ctx.strokeStyle = '#3B82F6';
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(20, h - 20);
+            ctx.lineTo(w - 40, h / 2);
+            ctx.strokeStyle = '#F59E0B';
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(w - 40, h / 2, 6, 0, Math.PI * 2);
+            ctx.fillStyle = '#1E40AF';
+            ctx.fill();
+
+            ctx.fillStyle = '#94A3B8';
+            ctx.font = '10px Inter';
+            ctx.fillText("St. Xavier's Main Campus", w - 130, h / 2 - 10);
+        }
+
+        window.addEventListener('resize', initRouteCanvas);
+
+        function updateStatsHeader() {
+            document.getElementById('stat-active-rides').innerText = ridesData.length;
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = msg;
+
+            toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+
+        function triggerEmergencyAlert() {
+            showToast('🚨 SOS Alert Sent! Campus Security Desk alerted.');
+        }
+    </script>
+</body>
+</html>
